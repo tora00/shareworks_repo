@@ -1,0 +1,12 @@
+System Analysis
+
+Part 1
+
+1 - PID 21651 is using up the most RAM
+2 - PID 22460 is consuing the most CPU
+3 - CPU idle time is at 76.4%, which means there's not a lot of programs that are consuming the CPU.
+	Memory usage is at around 78%. However, that is discounting that cached and buffer memories are "free". So Mem usage is more than acceptable.
+	PID 22460 has a 475% CPU usage, though this isn't alarming since top only displays the usages on a single cpu, and a system can have multiple cores and is most likely running the program in different cores.
+	Since 23% of CPU time is in user space, then it's safe to assume that system has more than enough cores to easily accommodate the cpu usage.
+	Load average is at 3.85 in the last minute. However, the average for the past 15 minutes is 0.99, which leads me to believe that the higher average in the first minute is not consistent (or perhaps a burst of activity)
+	Conclusion: The system is NOT in distress.
