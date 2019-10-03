@@ -2,18 +2,171 @@ Part 3 - Stacktrace Debugging
 
 --------------------- START OF 1 ---------------------
 
+[Block 1]
 
+Caused by: com.solium.common.ejb.VerificationException: [The release
+quantity exceeds the number of units available for employee grant number
+312]
 
+Comments:
+	- It looks like each employee grant (as an object) contains a 'units
+		available' variable that provides some sort of release control.
+	- From the given scenario, it's possible when the admin tried to
+		run a report, the system found an anomaly where the release quantity
+		surpasses the 'units available' cap. This in turn may have triggered
+		the Pre-release/withold report call in Block 2, which halted the 
+		report generation and the error page was shown.		
+	- Not necessarily a part of the code base, just a result of code running.
+	
+...
 
+[Block 2]
 
+com.solium.esoap.release.ejb.release.ReleaseAdminBean_7iiyuo_ReleaseAdminL
+ocalImpl.getReleaseQuantityFactorData(ReleaseAdminBean_7iiyuo_ReleaseAdmin
+LocalImpl.java:2666)
+at
+com.solium.esoap.release.ejb.release.PreReleaseParticipantGainAndWithholdi
+ngReportAdminBean.getParticipantGainAndWithholdingReport(PreReleasePartici
+pantGainAndWithholdingReportAdminBean.java:361)
+
+Comments:
+	- "ReleaseAdminBean" sounds like an object that handles setting or
+		assigning release quantities for each employee grant numbers.
+	- "Pre-release participant gain and witholding report AdminBean"
+		Not too sure about this. Maybe something like preliminary changes
+		to something before report generation?
+
+...
+
+[Block 3]
+
+com.solium.esoap.release.spring.prereleaseparticipantgainandwithholding.Pr
+eReleaseParticipantGainAndWithholdingController$PreReleaseParticipantGainA
+ndWithholdingSearcher.search(PreReleaseParticipantGainAndWithholdingContro
+ller.java:704)
+at
+com.solium.esoap.release.spring.prereleaseparticipantgainandwithholding.Pr
+eReleaseParticipantGainAndWithholdingController$PreReleaseParticipantGainA
+ndWithholdingSearcher.search(PreReleaseParticipantGainAndWithholdingContro
+ller.java:598)
+at
+com.solium.lib.spring.framework.controller.BaseController.processSearch(Ba
+seController.java:593)
+
+Comments:
+	- Sounds like it's a similar mechanism as block 2, but this one's a controller. 
+	- Looks like it has some sort of searching method?
+
+...
+[Block 4]
+
+Caused by: com.solium.common.ejb.VerificationException: [The release
+quantity exceeds the number of units available for employee grant number
+312]
+at
+com.solium.esoap.ejb.admin.employeegrantadmin.EmployeeGrantAdminBean.valid
+ateInBalance(EmployeeGrantAdminBean.java:7373)
+
+Comments:
+	- Most related to the exception thrown based on the naming scheme.
+	- Possibly responsible for containing information of each Employee Grant.
+	- If the units available is stored here, the verification exception would
+		have been thrown as soon as it detected a higher release quantity
+		in comparison.
+	- Aha! validateInBalance method in EmployeeGrantAdminBean class raised a
+		Verification Exception.
+
+...
+
+[Block 5]
+Caused by: java.lang.RuntimeException:
+com.solium.common.ejb.VerificationException: [The release quantity exceeds
+the number of units available for employee grant number 312]
+at
+com.solium.esoap.release.ejb.release.PreReleaseParticipantGainAndWithholdi
+ngReportAdminBean.getParticipantGainAndWithholdingReport(PreReleasePartici
+pantGainAndWithholdingReportAdminBean.java:404)
+
+Comments:
+	- Similar to block 4 in a way that this raised the VerificationException as well
+		however, it's raised by the PreReleaseParticipantGainAndWithholdingReportAdminBean
+		class instead when it executed the getParticipantGainAndWithholdingReport method.
+
+[Block 6]
+
+com.solium.esoap.release.ejb.release.ReleaseAdminBean.getReleaseQuantityFa
+ctorDataAddPendingExercise(ReleaseAdminBean.java:2655)
+at
+com.solium.esoap.release.ejb.release.ReleaseAdminBean.getReleaseQuantityFa
+ctorData(ReleaseAdminBean.java:2583)
+
+Comments:
+	- ReleaseAdminBean looks like it's the one responsible for setting the
+		release quantity
 
 --------------------- END OF 1 -----------------------
 
 --------------------- START OF 2 ---------------------
 
-Spring AOP support:
+Spring framework:
 	com.bea.core.repackaged.springframework.aop.support.AopUtils.invokeJoinpoi
 	ntUsingReflection(AopUtils.java:310)
+	at
+	com.bea.core.repackaged.springframework.aop.framework.ReflectiveMethodInvo
+	cation.invokeJoinpoint(ReflectiveMethodInvocation.java:182)
+	at
+	com.bea.core.repackaged.springframework.aop.framework.ReflectiveMethodInvo
+	cation.proceed(ReflectiveMethodInvocation.java:149)
+	at
+	com.bea.core.repackaged.springframework.aop.support.DelegatingIntroduction
+	Interceptor.doProceed(DelegatingIntroductionInterceptor.java:131)
+	at
+	com.bea.core.repackaged.springframework.aop.support.DelegatingIntroduction
+	Interceptor.invoke(DelegatingIntroductionInterceptor.java:119)
+	at
+	com.bea.core.repackaged.springframework.aop.framework.ReflectiveMethodInvo
+	cation.proceed(ReflectiveMethodInvocation.java:171)
+	at
+	com.bea.core.repackaged.springframework.jee.spi.MethodInvocationVisitorImp
+	l.visit(MethodInvocationVisitorImpl.java:37)
+	at
+	weblogic.ejb.container.injection.EnvironmentInterceptorCallbackImpl.callba
+	ck(EnvironmentInterceptorCallbackImpl.java:54)
+	at
+	com.bea.core.repackaged.springframework.jee.spi.EnvironmentInterceptor.inv
+	oke(EnvironmentInterceptor.java:50)
+	at
+	
+Java EE
+	weblogic.ejb.container.internal.RemoteBusinessIntfProxy.invoke(RemoteBusin
+	essIntfProxy.java:84)
+	
+	...
+	
+	weblogic.servlet.internal.StubSecurityHelper$ServletServiceAction.run(Stub
+	SecurityHelper.java:227)
+	at
+	weblogic.servlet.internal.StubSecurityHelper.invokeServlet(StubSecurityHel
+	per.java:125)
+	at
+	weblogic.servlet.internal.ServletStubImpl.execute(ServletStubImpl.java:300)
+	at weblogic.servlet.internal.TailFilter.doFilter(TailFilter.java:26)
+	at
+	weblogic.servlet.internal.FilterChainImpl.doFilter(FilterChainImpl.java:56)
+	at
+	
+PJL Compressing Filter
+	com.planetj.servlet.filter.compression.CompressingFilter.doFilter(Compress
+	ingFilter.java:222)
+	
+	Comments:
+	- Not familiar with this library, but I found it in sourceforge and github
+		(https://sourceforge.net/projects/pjl-comp-filter/) and
+		(https://github.com/ziplet/ziplet/tree/master/src/main/java/com/github/ziplet/filter/compression)
+	- A servlet filter intercepts client request/response to do preprocessing
+	- I'm assuming a filter requires substantial uses so a more lightweight package
+		would be preferrable for the system to be a bit more optimized, hence the PJL library.
 
 --------------------- END OF 2 -----------------------
 
@@ -21,6 +174,13 @@ Spring AOP support:
 
 --------------------- START OF 3 ---------------------
 
+Specifically, it looks like each employee grant (as an object) contains a 'units available' variable that provides some sort of release control.
+From the given scenario, it's possible when the admin tried to run a report, the system found an anomaly where the release quantity
+surpasses the 'units available' cap. This in turn may have triggered the Pre-release/withold report call in Block 2, which halted the 
+report generation and thrown the Verification Exception error.
+
+In general, the VerificationException class seems like it is used for catching actions that may be deemed
+as an 'illegal action' by the system. This could be thrown from failed checks such as a simple conditional or from assertions to name a few.
 
 --------------------- END OF 3 -----------------------
 
@@ -29,6 +189,16 @@ Spring AOP support:
 
 --------------------- START OF 4 ---------------------
 
+From the stacktrace, there were two methods that threw the VeriticationException:
+	EmployeeGrantAdminBean.validateInBalance
+		and
+	PreReleaseParticipantGainAndWithholdingReportAdminBean.getParticipantGainAndWithholdingReport
+	
+We want to find the first instance of the thrown VerificationException. The stack trace prints the first
+printStackTrace method when the exception is caught, then the subsequent calls after.
+
+In this case, the PreReleaseParticipantGainAndWithholdingReportAdminBean.getParticipantGainAndWithholdingReport
+threw the first VerificationException.	
 
 --------------------- END OF 4 -----------------------
 
@@ -37,5 +207,11 @@ Spring AOP support:
 
 --------------------- START OF 5 ---------------------
 
+Since we found the first stacktrace occurence from #4, I took at look at that and found 
+	
+	com.planetj.servlet.filter.compression.CompressingFilter.doFilter(CompressingFilter.java:222)
+	
+as the first non-framework method call in the execution since it's a library call.
+Prior to that is mostly weblogic(Java EE) and Spring framework servlet calls
 
 --------------------- END OF 5 -----------------------
