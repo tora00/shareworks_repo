@@ -13,8 +13,8 @@ Part 1
 
 	
 Part 2
-	This output is caused by running the `ps -ef` command.
-	<need to send email to make sure it is running the ps-ef command or some other custom columns
+	PID 24086 is the Java process with the largest heap.
+	Its maximum heap size is set to 16 gigabytes, initial heap size of 2 gigabytes, and initial heap size of eden generation of 1 gigabyte
 
 Part 3
 	1)	It is JVM performance monitor that tracks CPU, Memory usage, and other metrics. Specifically, this screenshot uses New Relic Java Performance Monitoring product.
