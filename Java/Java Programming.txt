@@ -1,0 +1,14 @@
+Part 1 - Java Programming
+
+1. 'JVM' means Java Virtual Machine. It is a runtime environment that allows us to run Java programs by
+	converting the Java bytecode(.class files) of the program into machine language. Additionally, it is responsible for
+	reclaiming and reusing Java memory through its Garbage collection.
+	
+2. A pointer is a variable that stores a memory address. It isn't the value that is stored in a memory address but rather
+	a variable that points to it.
+	Java does not support pointers in the way C or C++ does. It does not allow you to access or modify pointers directly.
+	However, Java uses pointers implicitly as a way to manipulate references.
+	
+3. The constructor of a class is called when a new object of that class is created.
+	A method is a piece of code implemented inside a class. It can only be called from an object that is already created.
+	

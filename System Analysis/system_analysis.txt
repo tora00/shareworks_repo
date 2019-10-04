@@ -1,12 +1,55 @@
 System Analysis
 
 Part 1
+	1) - PID 21651 is using up the most RAM
+	2) - PID 22460 is consuing the most CPU
+	3) - The System is not in distress.
+		
+		CPU idle time is at 76.4%, which means there's not a lot of programs that are consuming the CPU.
+		Memory usage is at around 78%. However, that is discounting that cached and buffer memories are "free". So Mem usage is more than acceptable.
+		PID 22460 has a 475% CPU usage, though this isn't alarming since top only displays the usages on a single cpu, and a system can have multiple cores and is most likely running the program in different cores.
+		Since 23% of CPU time is in user space, then it's safe to assume that system has more than enough cores to easily accommodate the cpu usage.
+		Load average is at 3.85 in the last minute. However, the average for the past 15 minutes is 0.99, which leads me to believe that the higher average in the first minute is not consistent (or perhaps a burst of activity)
 
-1 - PID 21651 is using up the most RAM
-2 - PID 22460 is consuing the most CPU
-3 - CPU idle time is at 76.4%, which means there's not a lot of programs that are consuming the CPU.
-	Memory usage is at around 78%. However, that is discounting that cached and buffer memories are "free". So Mem usage is more than acceptable.
-	PID 22460 has a 475% CPU usage, though this isn't alarming since top only displays the usages on a single cpu, and a system can have multiple cores and is most likely running the program in different cores.
-	Since 23% of CPU time is in user space, then it's safe to assume that system has more than enough cores to easily accommodate the cpu usage.
-	Load average is at 3.85 in the last minute. However, the average for the past 15 minutes is 0.99, which leads me to believe that the higher average in the first minute is not consistent (or perhaps a burst of activity)
-	Conclusion: The system is NOT in distress.
+	
+Part 2
+	This output is caused by running the `ps -ef` command.
+	<need to send email to make sure it is running the ps-ef command or some other custom columns
+
+Part 3
+	1)	It is JVM performance monitor that tracks CPU, Memory usage, and other metrics. Specifically, this screenshot uses New Relic Java Performance Monitoring product.
+		It expands on memory usage specifically on heap memory usage, as well as tracking CPU usage when the JVM initiates garbage collection.
+			
+	2)	Based on reading the definitions online and understanding the concept myself, the graphs are defined as such:
+	
+			Par Eden Space
+				- Newly created Java objects are allocated memory from this pool
+				- When there isn't enough memory to allocate from this pool, the Garbage Collection is initiated and all unreachable objects are cleaned.
+				- However, objects that are still reachable are moved into Survivor Space
+				- GC uses Parallel Collector algorithm
+			
+			Par Survivor Space
+				- No newly created objects are memory-allocated from here
+				- This heap memory division is only reachable from the GC moving objects here.
+				- GC can run in this region to clean unreachable objects and move reachable ones into Old Gen after surviving a few GC generations
+				- GC uses Parallel Collector algorithm
+				
+			CMS Old Gen
+				- This pool only contains objects that have been in the Par Survivor Space for a while.
+				- This area is ideally for permanent objects, so GC *should* not run here.
+				- GC uses CMS Collector algorithm
+				
+		Since CMS Old Gen is where objects are permanently stored, it is necessary that temporary objects do not end up here.
+		That would mean ensuring the Par Eden Space and Par Survivor Space has enough division size to avoid initializing GC before temporary objects are dereferenced.
+	
+	3)	No, the system is not distress.
+		
+		The response time is 4,860ms and throughput at 1 request per minute. These are seemingly terrible performance numbers, especially at low CPU usage! An optimized system would have a minimized response time and maximized throughput.
+		However, it may not be the case after all!
+		Initially, my first reaction was the high response time being caused by the GC bottlenecking the CPU. However, it's not the case here as evidenced by the garbage collection CPU time and overall CPU usage.
+		Next, I checked the garbage collection type in Eden Space. It is a Parallel GC algorithm that utilizes a stop-the-world event, ie. All applications are interrupted so the GC can do its work.
+		Looking at the Eden Space heap usage over time, we can see that almost 500MB worth of heap memory has been freed (then re-occupied half), and reachable objects have been moved to the Survivor heap.
+		This means the high response time and low throughput was most likely caused by the Garbage Collector initializing a stop-the-world event when it used Parallel collection on the Eden Space.
+		
+		
+		
