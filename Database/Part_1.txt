@@ -1,3 +1,57 @@
 Part 1 - Database
 
-1) 
+1)	To understand Oracle tablespaces, we start with the structure of a database. A database has physical
+	and logical storage structures. The physical storage structures are files that contains all types of
+	data about the database and data objects and are stored on the disk. These are called datafiles and
+	uses .dbf extension.
+	
+	However, some of these datafiles have specific uses. For example, a collection of datafiles called
+	users1.dbf and users2.dbf contains data about users such as tables and objects. We also have system data
+	such as data dictionary tables and system objects that is maintained by Oracle and is physically stored
+	in system1.dbf, system2.dbf, and system3.dbf, like important stuff that we shouldn't be reaaally touching.
+	The file names and collective amount are arbitary and can take any names as long as the .dbf extension is used.
+	When these files are stored into the database, we want to make sure that datafiles with similar functions
+	are grouped	together to provide better control and maintenance. That's where tablespaces come in.
+
+	Tablespaces is a logical storage unit where Oracle stores data when it divides the database. With the 
+	example above, all user-related	datafiles (users1 and users2) are stored into the USERS tablespace, 
+	while system data(system1, system2, system3) are stored in the SYSTEM tablespace. By default, Oracle
+	comes with the following tablespaces: SYSTEM, USERS, UNDOTBS1, TEMP, and SYSAUX. The UNDOTBS1 tablespace contains
+	"previous" data when we make changes in the database that haven't been committed yet for the purpose of
+	rollback. The TEMP tablespace contains temporary data from processing operations such as sorting. The SYSAUX
+	tablespace contains database components that was previously stored in SYSTEM. SYSAUX essentially acts as
+	as secondary tablespace for SYSTEM.
+	
+	
+	Using a tablespace allows us to control the size allocation of database data. For transactions, tablespaces
+	also provide setting space quotas for database users. Tablespaces are also especially useful for maintenance
+	such as backups/recovery, and data allocation to improve performance.
+	
+	On the top level, a database can contain one or more tablespaces. Each tablespace can contain one or more datafiles.
+	And lastly, each datafile can belong to only one tablespace.
+	
+	
+2)	An Extent is a collection of contiguous data blocks - essentially performing as a storage container for data blocks.
+	When Oracle stores data, it is stored into the smallest	units of storage called data blocks. In order for data
+	blocks to form a particular type of information on the logical space, it forms a contiguous 'line'
+	(ie. blocks are linked together), and this is what we refer to as an extent. When an extent becomes full, another
+	extent is allocated.
+	
+	
+3)	The relationship between a tablespace and extent is based on extent management. When an extent is allocated, we need
+	to keep track of it as well as keeping track of other free spaces. When we create a tablespace, we can choose
+	the extent size based on our requirements. More specifically, tablespaces can be created as either local or dictionary.
+	However, there is a performance distinction between Dictionary Managed Tablespaces and Locally Managed Tablespaces, especially
+	for tracking allocated extents and free spaces.
+	
+	Dictionary Manage Tablespaces (DMT for short) lets Oracle use the data dictionary to store details regarding
+	(de)allocated extents and free spaces. The issue with DMT is that in order to record free and used space, it needs to perform
+	inserts and deletes on the system tables. Consequently, this adds contention to other DML operations, and caused performance issues.
+	
+	A Locally Managed Tablespace (LMT) does not require the data dictionary to keep track of extents and free space. It maintains 
+	the information in bitmaps stored in its header. This means there is no contention for dictionary objects and performance is
+	significantly improved! Because LMTs have much more control when it comes to creating tablespaces, it is able to either
+	automatically allocate extent sizes, or specify a uniform size, for its settings.
+	
+	
+	

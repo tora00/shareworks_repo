@@ -38,22 +38,29 @@
 
 		
 	c)	However, we are also modifying the SC_TRANSACTION_ITEM table to accommodate the following changes:
-			- Remove cost column since it will be predefined in SC_SERVICE
 			- Remove description column since SC_SERVICE will provide consistent naming of the service
 			- Add service_id column to SC_TRANSACTION_ITEM as a foreign key to connect the table to a service
+			- Retain the cost column as it will record the cost of the service at that given time and accommodate (d).
 		
 			ALTER TABLE SC_TRANSACTION_ITEM
-			DROP cost, DROP descrption;
+			DROP descrption;
 			
 			ALTER TABLE SC_TRANSACTION_ITEM
 			ADD FOREIGN KEY(service_id) REFERENCES SC_SERVICE(service_id);
 			
-		The creation of the SC_SERVICE table in (a) allows adding new service types at run time.
+		The creation of the SC_SERVICE table in (a) allows adding new service types at run time.		
 		
-		
-		There is a slight issue if we want to ensure that all transaction items are associated with a service. To achieve that,
-		we'll have to enforce a NOT NULL on the service_id column in SC_TRANSACTION_ITEM. But there's a problem! enforcing a 
-		NOT NULL would require us to make sure that all previous entries have the appropriate service_id set.
+		NOTE:
+			There is a slight issue if we want to retroactively ensure that all transaction items are associated with a service.
+			To achieve that, we'll have to enforce a NOT NULL constraint on the service_id column in SC_TRANSACTION_ITEM. But there's a problem! enforcing a 
+			NOT NULL would require us to make sure that all previous entries have the appropriate service_id set.
+			
+			It's possible to change the service type of existing entries to its appropriate service id by matching descriptions with wildcards
+			(eg. if a description matches to %oil% then set its service_id column to the appropriate id)
+			
+	d)	If prices of services will consistently fluctuate, it would be a good idea to retain the cost column of SC_TRANSACTION_ITEM. However,
+		the end user-facing system should not allow input of the cost column and we can just create a trigger to automagically set the cost of 
+		the transaction_item based on the price of the service set.
 		
 		
 		
