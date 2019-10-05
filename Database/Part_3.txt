@@ -1,0 +1,62 @@
+
+1.	Since the format of the email address is a simple string, we can simply add a new column to SC_MECHANIC and SC_CUSTOMER
+	named email with the datatype VARCHAR(255):
+	
+		ALTER TABLE SC_MECHANIC
+		ADD email VARCHAR(255);
+		
+		ALTER TABLE SC_CUSTOMER
+		ADD email VARCHAR(255);
+	
+	As for the physical address, because it has a more complex structure we can create a table called SC_ADDRESS with the
+	following columns, assuming all fields are required to be filled in:
+	
+		CREATE TABLE SC_ADDRESS(
+			address_id			INT AUTO_INCREMENT,
+			suite		INT NOT NULL,
+			street		VARCHAR(255) NOT NULL,
+			city		VARCHAR(75) NOT NULL,
+			province	VARCHAR(75) NOT NULL,
+			country		VARCHAR(75) NOT NULL,
+			PRIMARY_KEY(address_id)
+		);
+		
+	Technically, it's also possible to reduce the country and province datatype to CHAR(2) if there is a system in place
+	outside of SQL that only passes in abbreviated country codes.
+	
+2.	a)	To achieve implementing a new Service type with entries that can be added over time, we'll have to create a new table
+		called SC_SERVICE that has the following columns:
+		
+			CREATE TABLE SC_SERVICE(
+				service_id		INT AUTO_INCREMENT,
+				service_name	VARCHAR2(150) NOT NULL,
+				price			DECIMAL(19,4) NOT NULL,
+				PRIMARY KEY(service_id)		
+			);
+			
+	b)	We can retain the SC_TRANSACTION_ITEM table to keep records of notes and service type
+
+		
+	c)	However, we are also modifying the SC_TRANSACTION_ITEM table to accommodate the following changes:
+			- Remove cost column since it will be predefined in SC_SERVICE
+			- Remove description column since SC_SERVICE will provide consistent naming of the service
+			- Add service_id column to SC_TRANSACTION_ITEM as a foreign key to connect the table to a service
+		
+			ALTER TABLE SC_TRANSACTION_ITEM
+			DROP cost, DROP descrption;
+			
+			ALTER TABLE SC_TRANSACTION_ITEM
+			ADD FOREIGN KEY(service_id) REFERENCES SC_SERVICE(service_id);
+			
+		The creation of the SC_SERVICE table in (a) allows adding new service types at run time.
+		
+		
+		There is a slight issue if we want to ensure that all transaction items are associated with a service. To achieve that,
+		we'll have to enforce a NOT NULL on the service_id column in SC_TRANSACTION_ITEM. But there's a problem! enforcing a 
+		NOT NULL would require us to make sure that all previous entries have the appropriate service_id set.
+		
+		
+		
+		
+		
+		
