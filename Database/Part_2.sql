@@ -1,4 +1,5 @@
 --Part 1 - Database
+-- QUERIES ARE BASED ON MYSQL FORMAT
 
 -- Question 1
 SELECT
