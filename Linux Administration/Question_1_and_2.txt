@@ -1,0 +1,173 @@
+Part 4 - Linux Administration
+
+1) Nano. The first command line editor I used was vim, but the lack of an on-screen shortcut and easier controls that nano offered made it hard to keep using vim as a beginner.
+
+2) a. pwd	[option]
+			* print name of the current/working directory
+			* For scripting, you can use PWD to reference the current directory you are on
+			* eg. To store a directory in a variable, we can do var_path=`pwd`. Then if we echo $var_path anywhere, it always returns the directory path we first stored into it.
+		Options:
+			- L --include symbolic link (like a shortened link to the actual directory)
+			- P --prints the full actual directories instead
+			
+	b. ln	<see form types below>
+			* creates a 'hard' or 'soft' link between files.
+			* 'Soft' links acts as a pointer to another file and  lose reference to the file when the original file is deleted
+			* 'Hard' links maintain the contents of the original file even when the original file is deleted	
+			* If we want to create a symlink, we use "ln -s source_file dest_file", where dest_file is the symlink of the source file.
+			* There are 4 forms this command can be used with:
+				i)	ln [option]... TARGET LINK_NAME		-- Creates the target link into link_name in the same directory
+				ii)	ln [option]... TARGET				-- Creates the link of the target into the current directory (target must be in a different directory)
+				iii)ln [option]... TARGET... DIRECTORY	-- Creates the link of the target into the directory with the same name
+				iv)	ln [option]... -t DIRECTORY TARGET 	-- Same as iii, but uses the -t option to specify the directory as the first argument and the target file second
+		Options:
+			-s By default, ln creates hard links. If we want to create a symlink, we use -s. (eg. Usage ln -s source dest)
+			-t Specifies the target directory to create the link in (eg. Usage is ln -t user/TargetFolder source.txt --TargetFolder now contains a hard link named source.txt)
+			-v Verbose. When this option is used, after the link is created, it prints where the linked file is linked to
+			-f Force. Overwrites the destination file, if it exists.
+			
+	c. ant	
+			* command used in Apache Ant, which is a Java build and deployment tool.
+			* this command can be used to compile, assemble, test, and run Java applications.
+			* for example, if we want to generate javadocs, we can execute "ant generate-javadoc"
+			* if no arguments are specified, it looks for a build.xml and uses it as the build file.
+			
+		Options:
+			-buildfile file		Uses a specific buildfile aside from the default directory
+			-find [file]		Attempts to find a build file in the currents directory, then working upwards the parent directories
+			-D<property>=value	this option allows to set properties in the command line. It overrides existing properties set in the build file
+			-debug				print the most amount of information to the console
+			-verbose			print additional information to the console
+			-quiet				print less information to the console
+			-silent				only print output and build failures
+	
+	d. sed	[option] {script} [file]
+			* A stream editor used for transforming text on the stream supplied from a file or pipeline
+			* If we want to replace all instances of "Hello" to "Goodbye" in HelloWorld.txt, we could do "sed -i '/s/Hello/GoodBye/' HelloWorld.txt"
+			* Of it we want to store a sed script and apply it to a text file we could do the following:
+				echo s/HELLO/GOODBYE/ > change.sed
+				sed -i -f change.sed HelloWorld.txt (if you want to make a backup of the file before applying script, change -i to -ibak)
+		
+		Options:
+			-e	Runs the expression as the first argument onto the input file as the second argument
+			-f	loads a sed script that contains an expression as the first argument then apply it to the input file as the second argument
+			-i	Specifies that the files provided in the input are to be edited in-place.
+				If we want to create a back up of Hello.txt, we specify an arbitrary suffix like -iBAK and a backup file called Hello.txtBAK will be created
+				
+	e. chmod
+			* modifies the file mode bits of a specified file
+			* this command has the form:
+				chmod <options> <permissions> file_name
+			* We can individually set permissions for the owner of the file(u), members of the owner's group(g), and others(o)
+			* There are 3 types of permissions: read(r), write(w), and execute(x)
+			* If we want to change a file Hello.java so that the owner has full access to it and everyone else can only read it, we would do:
+				chmod u=rwx,go=r Hello.java
+			* If we want to add a write permission to group, we simply do:
+				chmod g+w Hello.java
+			* We can also use a numerical representation of the permissions through a numbering system from 0 to 7:
+				0 - No permission		3 - Write+Execute		6 - Read+Write
+				1 - Execute				4 - Read				7 - Read+Write+Execute
+				2 - Write				5 - Read+Execute
+			* So if we want to change permissions in Hello.java so the owner has full access while everyone else can only read, we can set it numerically by:
+				chmod 744 Hello.java
+				
+		Options:
+			-R apply the changes to all files and subdirectories(if a directory is provided)
+			-v outputs all the changes made on the console
+			--reference=RFILE	change the permissions of the file based exactly on RFILE's permissions
+				
+	f. ps	[options]
+			* displays information about a selection of active processes.
+			* it only displays the snapshot of the processes when the command was executed
+			* if -e is not specified, it only shows processes running in the shell, otherwise it snapshots all processes in that system
+			* if we want to be specific and get a snapshot of all processes and show only the uid, pid, cpu utilization, mem usage, and command, we use the following options:
+				ps -eo uid,pid,c,pmem,cmd
+			* otherwise, we can simply use ps -ef (or -eF for a fuller listing) 
+			
+		Options:
+			-e/-A		Selects all processes (otherwise it only shows processes in the shell)
+			-C exec		Selects all processes with the executable name provided in exec
+			-u usr		selects all processes being ran by usr
+			-f			Outputs with full format listing. Columns include: uid, pid, ppid, cpu, stime, tty, time, cmd
+			-F			similar to -f, but with additional columns of: sz, rss, psr
+			-o			User defined format. You can specify which columns to show by a comma delimited list (eg. ps -o uid,pid)
+			-x			Displays all processes that is owned by the one who ran the ps command
+			
+	g. kill	[options] pid
+			* sends a signal to a process id. Default signal is TERM (terminate)
+			* this only works with pid, if we want to kill by name, we use `pkill` instead
+			* if we want to terminate a process with the PID 7912, we use the command pkill 7912
+			* if we want to terminate multiple processes we can use the command pkill 7912 7923 7934
+			
+		Options:
+			-l {arg}	without an argument, it lists all signal types. If a number argument is supplied, it is translated to the signal name
+			-s			Sends a signal type of s to the process (eg. -9 sends a KILL signal. -KILL and -SIGKILL are equivalent to -9)
+			
+	h. scp	[option] [[user@]fromhost:]file [[user@]tohost:]file2
+			* securely transfers files between hosts (could be local to remote, remote to remote, or remote to local)
+			* it will ask for passwords when the connection requires authentication
+			* to copy a file from a remote host to my Test Folder directory, we use
+				scp username@hostname:Hello.txt /home/kevin/TestFolder
+			* to copy a file from local host to remote, we use
+				scp Hello.txt username@hostname:/remote/directory
+			* to copy a directory of a remote host(remote1) to another remote host(remote2), we use
+				scp -r username@remote1:/this/directory username@remote2:/that/directory
+		Options:
+			-r	allows copying of directories
+			-p	preserves modification and access times, as well as permission modes of the original file
+			-C	chooses a cipher to encrypt the content with
+			-l	limits the transfer rate in Kbit/s
+			-P	port to connect to on the remote host
+			-o	passes options that follows the ssh_config format
+			
+	i. ssh [option] [altnerate@]hostname
+			* it's a program that allows for logging into, and executing programs, on a remote machine.
+			* this provides secure and encrypted communications between the two hosts.
+			* to connect to a remote host remote.server.com we use:
+				ssh remote.server.com
+			* if we want to connect as a specific user we can use:
+				ssh otheruser@remote.server.com
+			
+		Options:
+			-l	specifies the user to log in as on the remote machine
+			-4	use ipv4 addresses only
+			-6	use ipv6 addresses only
+			-c	selects the cipher for encrypting the session
+			-p	specifies the port to connect to on the remote host
+			-R	forward the given port from the remote host to the local host and port
+			-L	forward the given port from the local host to the remote host and port
+			-D	allow dynamic port-fowarding
+	
+	j. crontab	[-u user] file							--FORM 1
+				[-u user] [ -i ] { -e | -l | -r }	--FORM 2
+				
+			* used to install files that contain schedule of cron entries to be executed at specific times (using FORM 1)
+			* if FORM 2 is specified, then allows editing, listing, or removing all cron files belonging to the user
+			* to add cron jobs from a file called cron_jobs.txt, we use
+				crontab cron_jobs.txt
+			* to edit cron jobs of a user kevin, we use
+				crontab -e kevin
+			
+		Options:
+			-u	specifies the user whose crontab is to be viewed or modified. If this field is not supplied, then it runs the crontab of the invoker
+			-i	prompt before deleting the user's crontab
+			-e	edit user's crontab
+			-l	list user's crontab
+			-r	delete user's crontab without prompt
+			
+	k. wc [option]... [file]...
+			* prints newline, word, and byte counts for each file
+			* if more than one file is specified, prints a total. If no file is specified, read from the standard input
+			* if no option is specified, it prints the counts of newline, words, characters of the file respectively
+			* To find the total number of words in Hello1.txt and Hello2.txt, we can use:
+				wc -w Hello1.txt Hello2.txt
+		
+		Options:
+			-c	print byte counts
+			-w	print word counts
+			-n	print newline counts
+			-m	print character counts
+			-L	print length of the longest line
+
+			
+			

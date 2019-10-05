@@ -1,0 +1,54 @@
+Part 4 - Linux Administration
+
+3)	a.	Add `sudo` before the command. Use `sudo -s` to run a shell with root privileges
+	b.	tail -500 log_file
+	c.	diff file1 file2
+	d.	diff -r Folder1 Folder2								--only shows files that are not present in both Folder1 and Folder2
+	e.	ps -eo uid,pid,pcpu,cmd --sort=-pcpu | head -n 2	--for clarity, only show top CPU process with the headear containing the user, pid, %cpu, and the issuing command
+	
+4)	DNS is essentially a phone book that translates domain names to its IP address. On a lower level, computers do not understand `google.com`, but rather it understands
+	ip addresses. When you visit a website "www.website.com" for the first time and the browser and your computer OS do not know its ip address, it asks the DNS resolver if it knows
+	what the ip address of the website is. If the DNS resolver does not know the namespace of the website, it queries the Root server. Since a valid website contains an extension (.com, .net, etc)
+	the Root server's response redirects the DNS resolver to the Top-Level Domain associated with the website's extension. The TLD server contains information of all websites that share a
+	certain domain (com, net, etc). When the DNS resolver queries the TLD, it replies with a redirection to the website's authoritative server. The authoritative server contains information
+	regarding the actual website and will finally reply with the IP address of "www.website.com". Once this cycle completes, the operating system saves the DNS lookup in its cache
+	for a quicker lookup when the website is revisited.
+	
+5)	Reverse SSH Tunneling can be explained as when a remote host has a ssh connection to the local host, we can use that connecction to establish another ssh connection from the local host back to the remote host.
+	
+	Assuming we have access to the physical remote host, we first establish a ssh connection from the remote host to the local host through the ssh command
+
+		ssh -R 50000:localhost:22 kevin@host.local
+		
+		Breaking it down to parts, we have the following:
+		
+		"-R"(reverse)
+			-> forward the port of the remote server (in this case, kevin@host.local) to the port of the local host (remote)
+			-> this perspective is switched because we first want to establish a connection from remote to local
+		
+		"50000:localhost:22"
+			-> 50000 is an arbitrary port that we'll use to forward to port 22 of localhost
+			-> This says "If we receive a connection request on port 50000, route them to port 22"
+			
+		"kevin@host.local"
+			-> the host we are connecting to
+			
+	After establishing a connection to the local host(kevin@host.local) from the remote server (remote), the port 50000 on our local computer
+	is listening to connections. We can establish a reverse ssh connection on our own computer by using port 50000 to connect back to the remote host with
+		
+		ssh localhost -p 50000
+		
+	This basically just means that we want to establish an ssh connection to our own computer, but on port 50000. Since the remote host has that
+	port 50000 forwarded to its own ssh port 22, we have essentially created an ssh connection from local to the remote host.
+	
+	Reverse SSH tunneling is extremely useful for working remotely while maintaining a secure line. Since the server is using the same port (22) on the reverse ssh,
+	it bypasses the intricacies of the remote server's tight firewall policies.
+
+6)	1 Megabyte = 1,000,000 bytes	= 10^6 bytes
+	1 Mebibyte = 1,048,576 bytes	= 2^20 bytes
+	
+	1 Gigabyte = 1,000,000,000 bytes = 10^9 bytes
+	1 Gibibyte = 1,073,741,824 bytes = 2^30 bytes
+	
+	1 Byte = 8 Bits
+	1 Megabyte = 8 Megabits
