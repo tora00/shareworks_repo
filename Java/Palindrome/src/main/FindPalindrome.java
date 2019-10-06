@@ -1,3 +1,25 @@
+/**
+ * @author Kevin Naval
+ * 
+ * Title: Find-a-palindrome-in-a-string-inator-inator
+ * 
+ * Description:
+ * 		Finds and prints a palindrome within a string.
+ * 		Preserves the original format of the palindrome
+ * 
+ * Changelog:
+ * 		Removed unnecessary lines
+ * 		Added a length check for potential palindrome (ie. skip if potential palindrome is shorter than the current longest)
+ * 		Added an optional timer for efficiency checking
+ * 
+ * Comments:
+ * 		Adding the length check (line 44),  there has been significant performance improvement based on a ~300 alphanumeric character palindrome
+ * 			Run time without check: 0.07090113 seconds
+ * 			Run time with check: 0.002179913 seconds
+ * 			= It's been improved by a factor of32!!!!!!!
+ * 			Though worst case scenario (correct palindrome at the end of the string) maintains similar run time even with the optimization
+ * 
+ */
 package main;
 
 import java.util.Scanner;
@@ -7,32 +29,40 @@ public class FindPalindrome {
 	public static void main(String[] args) {
 		Scanner s = new Scanner(System.in);
 		String input = "";
-		String output = "none";
 		String prev = "";
 		String curr = "";
-		String regex = "[^a-zA-Z0-9]";
 		System.out.print("Input: ");
 		input = s.nextLine();
 		s.close();
+		boolean enableTimer = true;		// Set to [false] to disable timer
+		long start = 0;
+		long end = 0;
+		
+		if(enableTimer)
+			start = System.nanoTime();
 		
 		if(input.length()>1) {			
 			for(int i = 0; i<input.length(); i++) {
 				for(int j=input.length(); j>i; j--) {
 					if(Character.toLowerCase(input.charAt(i)) == Character.toLowerCase(input.charAt(j-1))) {
+						if(prev.length()>(j-i))		//Performance improvement, skips check if the candidate length is shorter than the current longest
+							break;
 						if(!(curr=isPalindrome(input.substring(i,j))).equals("")){								//Returns either a palinfrom or empty string. The condition fails if it is the latter		
-							if(curr.replaceAll(regex,"").length() >= prev.replaceAll(regex,"").length()) {		//Compares curr with prev regardless of special characters. Replaces or retains prev with the longer palindrome
+							if(curr.replaceAll("[^a-zA-Z0-9]","").length() >= prev.replaceAll("[^a-zA-Z0-9]","").length()) {		//Compares curr with prev regardless of special characters. Replaces or retains prev with the longer palindrome
 								prev = curr;
 							}
 						}
 					}
 				}
-			}
-			if(!prev.equals(""))	//sets palindrome to output. "none" if there is no palindrome in input
-				output = prev;
-			else
-				output = "none";			
-		}	
-		System.out.println("Longest Palindrome: "+output);
+			}		
+		}
+		
+		System.out.println("Longest Palindrome: "+(!prev.equals("")?prev:"none"));
+		
+		if(enableTimer) {
+			end = System.nanoTime();
+			System.out.println("Run time: "+((float)(end-start)/1000000000)+" seconds");
+		}
 	}
 	
 	/**
