@@ -34,7 +34,7 @@ public class FindPalindrome {
 		System.out.print("Input: ");
 		input = s.nextLine();
 		s.close();
-		boolean enableTimer = true;		// Set to [false] to disable timer
+		boolean enableTimer = false;		// Set to [false] to disable timer
 		long start = 0;
 		long end = 0;
 		
